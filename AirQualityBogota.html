@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bogotá Air Quality </title>
+
+    <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+    
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="script.js"></script>
+
+</head>
+<body>
+
+<!--HEADER -->
+<header>
+  <div class="header-left">
+    
+    <h1>Bogotá Air Quality<br><em>Observatory</em></h1>
+    <p class="subtitle">
+      This is an interactive spatial analysis of atmospheric pollution across Colombia's
+      capital — mapping PM2.5, PM10 and NO₂ concentrations recorded at official 
+      monitoring stations operated by the Secretaría Distrital de Ambiente de Bogotá, obtained
+      from open sources to generate a real-time web GIS. 
+    </p>
+  </div>
+  <<div class="live-badge" id="live-badge">
+  <div class="live-dot" id="live-dot"></div>
+  <span id="live-label">Connecting…</span>
+</div>
+</header>
+
+<!-- NAVIGATION TABS -->
+<nav>
+  <a href="#" class="active" onclick="showView('map',this)">🗺 Interactive Map</a>
+  <a href="#" onclick="showView('about',this)">📖 About the Data</a>
+  <a href="#" onclick="showView('methodology',this)">⚙ Methodology</a>
+</nav>
+
+<!-- MAP VIEW -->
+<div id="view-map" class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Layers -->
+    <div class="sidebar-section">
+      <h3>Pollutant Layer</h3>
+      <button class="layer-btn active" onclick="setLayer('pm25',this)">
+        <span class="layer-dot" style="background:#ff6b35"></span>
+        PM2.5 — Fine Particles
+      </button>
+      <button class="layer-btn" onclick="setLayer('pm10',this)">
+        <span class="layer-dot" style="background:#ffe233"></span>
+        PM10 — Coarse Particles
+      </button>
+      <button class="layer-btn" onclick="setLayer('no2',this)">
+        <span class="layer-dot" style="background:#00e5ff"></span>
+        NO₂ — Nitrogen Dioxide
+      </button>
+    </div>
+
+    <!-- AQI Legend -->
+    <div class="sidebar-section">
+      <h3>Air Quality Index</h3>
+      <div class="aqi-legend">
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#a8ff3e"></div>
+          <span>Good</span>
+          <span class="aqi-range">0–50</span>
+        </div>
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#ffe233"></div>
+          <span>Moderate</span>
+          <span class="aqi-range">51–100</span>
+        </div>
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#ff9a33"></div>
+          <span>Sensitive Groups</span>
+          <span class="aqi-range">101–150</span>
+        </div>
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#ff4e42"></div>
+          <span>Unhealthy</span>
+          <span class="aqi-range">151–200</span>
+        </div>
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#c9176e"></div>
+          <span>Very Unhealthy</span>
+          <span class="aqi-range">201–300</span>
+        </div>
+        <div class="aqi-row">
+          <div class="aqi-swatch" style="background:#7e0023"></div>
+          <span>Hazardous</span>
+          <span class="aqi-range">301+</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Station list -->
+    <div class="sidebar-section" style="flex:1">
+      <h3>Monitoring Stations</h3>
+      <div id="station-list"></div>
+    </div>
+
+  </aside>
+
+  <!-- MAP -->
+  <div style="position:relative; flex:1">
+    <div id="map"></div>
+  </div>
+
+</div>
+
+<!-- ABOUT THE DATA SECTION -->
+<div id="view-about" class="page-section">
+  <h2>About Bogotá's Air Quality Crisis</h2>
+<div class="about-images-top">
+  <div class="about-img-card">
+    <img src="Images/IMG_9280.jpg" alt="Vista aérea de Bogotá" />
+    <span>Aerial view of 100TH Street, one of the most transited streets in Bogotá D.C.</span>
+  </div>
+  <div class="about-img-card">
+    <img src="images/IMG_5572.jpg" alt="Centro histórico de Bogotá" />
+    <span>Centro histórico, La Candelaria</span>
+  </div>
+</div>
+  <p>
+    Bogotá is the capital of Colombia and one of the most important cities in Latin 
+    America. It boasts one of the highest industrial, financial, and commercial 
+    densities on the continent, in addition to its more than 8 million inhabitants.
+    The city is located at a high altitude, approximately 2,625 meters above sea 
+    level, which contributes to the retention of particulate matter in the air. 
+    This, combined with critical mobility issues—such as heavy truck traffic and the
+     BRT mass transit system—generates polluting emissions that further exacerbate 
+     the problem.
+  </p>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="value">8.3M</div>
+      <div class="label">Population, Bogotá D.C.</div>
+    </div>
+    <div class="info-card">
+      <div class="value">2,625m</div>
+      <div class="label">Altitude above sea level</div>
+    </div>
+    <div class="info-card">
+      <div class="value">~19μg/m³</div>
+      <div class="label">Annual mean PM2.5 (2023)</div>
+    </div>
+    <div class="info-card">
+      <div class="value">15μg/m³</div>
+      <div class="label">WHO PM2.5 guideline (2021)</div>
+    </div>
+  </div>
+
+  <h3>Key Pollutants Mapped</h3>
+
+  <p>
+    <strong style="color:var(--accent2)">PM2.5 (Fine Particulate Matter)</strong> — particles
+    smaller than 2.5 micrometres in diameter that penetrate deep into lung tissue and enter the
+    bloodstream. Primary sources in Bogotá include diesel vehicles, construction sites and
+    cooking fires in low-income peripheral neighbourhoods. Chronic exposure is strongly linked to
+    respiratory and cardiovascular disease (WHO, 2021).
+  </p>
+
+  <p>
+    <strong style="color:var(--moderate)">PM10 (Coarse Particulate Matter)</strong> — particles
+    up to 10 micrometres, primarily generated by road dust, quarrying and industrial processes
+    in the Fontibón and Kennedy localities, adjacent to El Dorado International Airport.
+    Concentrations tend to peak during the dry seasons (January–March and July–August).
+  </p>
+
+  <p>
+    <strong style="color:var(--accent)">NO₂ (Nitrogen Dioxide)</strong> — a toxic 
+    gas produced mainly by transport vehicles such as TransMilenio BRT. For example,
+     TransMilenio corridors show the highest Nitrogen Dioxide readings, consistent
+      with global evidence linking traffic density to elevated nitrogen dioxide 
+      levels (Larsen et al., 2017).
+  </p>
+
+  <h3>Impact on People's Life</h3>
+
+  <p>
+    Air pollution in the city is one of the biggest health problems among the population. 
+    The increase in respiratory illnesses is closely linked to this situation, and 
+    socioeconomic segregation is also evident. The difference between social classes
+     and sectors is even apparent in terms of air pollution levels in the city, as 
+     areas inhabited by people with higher incomes have lower levels. These areas 
+     also tend to have less traffic, virtually no industrial zones, more well-maintained 
+     green spaces, and less population density.
+  </p>
+
+  <p>
+    Using information extracted from the "District Secretariat of the Environment 
+    (SDA) operates the Bogotá Air Quality Monitoring Network (RMCAB)," an interactive 
+    real-time map is generated that, thanks to the open and freely accessible 
+    information provided by the Mayor's Office of Bogotá, allows us to identify 
+    patterns and propose solutions that can mitigate the impact on people's physical
+     health, and even on their mental health, since better health and a lower 
+     perception of pollution help the visual enjoyment of the environment.
+  </p>
+  <div class="about-images-bottom">
+  <div class="about-img-card">
+    <img src="images/IMG_8234.jpg" alt="Contaminación del aire en Bogotá" />
+    <span>Smog above Bogota city centre</span>
+  </div>
+  <div class="about-img-card">
+    <img src="images/IMG_8676.jpg" alt="Tráfico y emisiones" />
+    <span>Panoramic view of International Centre Bogota</span>
+  </div>
+</div>
+</div>
+
+<!--  METHODOLOGY SECTION-->
+<div id="view-methodology" class="page-section">
+  <h2>Methodology</h2>
+
+  <h3>Data Sources</h3>
+
+  <p>
+    The open-source data is obtained from OpenAQ, a platform that allows us to 
+    register information in real time; this information is therefore extracted 
+    from the RMCAB network <strong>(Secretaría Distrital de Ambiente)</strong>. The information
+     will be extracted from there in real time, making it easy to identify changes
+      over time and across space.
+  </p>
+
+  <h3>Mapping Approach</h3>
+
+  <p>
+    The map distributed is based on the location of each monitoring station around 
+    the city. Marker size scales with the concentration reading register in our 
+    open-source. You can identify the three main pollutants by following the colour
+    legend that defines the risk of each one.
+  </p>
+
+  <h3>Technologies Used</h3>
+
+  <p>
+    HTML5 · CSS3 (Grid, custom properties, animations) · JavaScript ES6+ ·
+    Leaflet.js 1.9.4 · Chart.js 4.4.1 · Google Fonts (Syne, DM Serif Display, Space Mono).
+    No build tools, frameworks or website generators were used.
+  </p>
+
+  <div class="about-images-bottom">
+  <div class="about-img-card">
+    <img src="images/IMG_9277.jpg" alt="Contaminación del aire en Bogotá" />
+    <span>Panoramic View North of Bogota, one of the wealthy areas of the city</span>
+  </div>
+  <div class="about-img-card">
+    <img src="images/IMG_0906.jpg" alt="Tráfico y emisiones" />
+    <span>Panoramic view of International Centre Bogota</span>
+  </div>
+</div>
+
+</body>
+</html>
